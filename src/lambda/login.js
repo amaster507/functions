@@ -30,19 +30,25 @@ exports.handler = async (event, context) => {
     jwtid: uuid(),
     subject: "login"
   })
+
+  return {
+    statusCode: 200,
+    body: AUTH_TOKEN
+  }
+
   return fetch("http://3.231.127.133:8080/graphql", {
     headers: {
       auth: AUTH_TOKEN
     },
     method: "POST",
-    body: 
+    body: ``
   }).then(() => ({
-      statusCode: 200,
-      body: JSON.stringify({
-        query: `query ($username: String!){ getUser(username:$username) { username isActive userId hasRole hasPassword { password } hasTypes hasGroupAccess { id hasRights { id name isTrue } forGroup { slug name isContact { id organization } isActive } } isContact { id firstName lastName } } }`,
-        variables: { "username": username }
-      })
-    }))
+    statusCode: 200,
+    body: JSON.stringify({
+      query: `query ($username: String!){ getUser(username:$username) { username isActive userId hasRole hasPassword { password } hasTypes hasGroupAccess { id hasRights { id name isTrue } forGroup { slug name isContact { id organization } isActive } } isContact { id firstName lastName } } }`,
+      variables: { "username": username }
+    })
+  }))
 
 
   // Send greeting to Slack
