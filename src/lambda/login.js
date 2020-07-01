@@ -33,7 +33,8 @@ exports.handler = async (event, context) => {
 
   return fetch("http://3.231.127.133:8080/graphql", {
     headers: {
-      auth: AUTH_TOKEN
+      auth: AUTH_TOKEN,
+      'Content-Type': 'application/json'
     },
     method: "POST",
     body: JSON.stringify({
