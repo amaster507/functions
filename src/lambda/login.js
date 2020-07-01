@@ -49,7 +49,7 @@ exports.handler = async (event, context) => {
         userdata.data &&
         userdata.data.getUser &&
         userdata.data.getUser.username &&
-        userdata.data.getUser.isActive &&
+        //userdata.data.getUser.isActive &&
         userdata.data.getUser.hasPassword &&
         userdata.data.getUser.hasPassword.password
       ) {
