@@ -54,18 +54,22 @@ exports.handler = async (event, context) => {
         userdata.data.getUser.hasPassword.password
       ) {
         delete userdata.data.getUser.hasPassword
-        const objectKeysToUpperCase = input => {
-          if (typeof input !== 'object') return input
-          if (Array.isArray(input)) return input.map(objectKeysToUpperCase)
-          return Object.keys(input).reduce(function (newObj, key) {
-            let val = input[key]
-            let newVal = (typeof val === 'object') ? objectKeysToUpperCase(val) : val
-            newObj[key.toUpperCase()] = newVal
-            return newObj
-          }, {})
-        }
+        // const objectKeysToUpperCase = input => {
+        //   if (typeof input !== 'object') return input
+        //   if (Array.isArray(input)) return input.map(objectKeysToUpperCase)
+        //   return Object.keys(input).reduce(function (newObj, key) {
+        //     let val = input[key]
+        //     let newVal = (typeof val === 'object') ? objectKeysToUpperCase(val) : val
+        //     newObj[key.toUpperCase()] = newVal
+        //     return newObj
+        //   }, {})
+        // }
         // const data = objectKeysToUpperCase(userdata.data.getUser)
-        const data = userdata.data.getUser
+        const data = {}
+        for (const [key, value] of Object.entries(userdata.data.getUser)) {
+          data[key.toUpperCase] = value
+        }
+        // const data = userdata.data.getUser
         const USER_TOKEN = jwt.sign({
           "https://missionbase.com/jwt/claims": data
         }, key, {
