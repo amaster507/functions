@@ -17,7 +17,7 @@ exports.handler = async (event, context) => {
   const username = params.username || null
   const pass = params.pass ? md5(params.pass) : null
   // NOTE: we could use the IP address to verify that the authorization stays with the IP that authenticated, but that could pose problems with users behind load balances/traveling
-  // const fromIP = event.headers?.["x-nf-client-connection-ip"] || "N/A"
+  const clientIp = event.headers?.["client-ip"] || null
   const AUTH_TOKEN = jwt.sign({
     "https://missionbase.com/jwt/claims": {
       "PASSWORD": pass,
@@ -44,9 +44,24 @@ exports.handler = async (event, context) => {
   })
     .then(body => body.json())
     .then(userdata => {
-      if (true /** FIXME: put a condition here to check for valid user */) {
+      if (
+        userdata?.data?.getUser?.username &&
+        userdata?.data?.getUser?.isActive &&
+        userdata?.data?.getUser?.hasPassword?.password
+      ) {
+        const objectKeysToUpperCase = input => {
+          if (typeof input !== 'object') return input;
+          if (Array.isArray(input)) return input.map(objectKeysToUpperCase);
+          return Object.keys(input).reduce(function (newObj, key) {
+            let val = input[key];
+            let newVal = (typeof val === 'object') ? objectKeysToUpperCase(val) : val;
+            newObj[key.toUpperCase()] = newVal;
+            return newObj;
+          }, {});
+        };
+        const data = objectKeysToUpperCase(userdata.data.getUser)
         const USER_TOKEN = jwt.sign({
-          "https://missionbase.com/jwt/claims": userdata
+          "https://missionbase.com/jwt/claims": data
         }, key, {
           // NOTE: This is the expiration time for users to stay logged in
           // FIXME: We need to implement a refresh token that will update an expiration time based on the users last seen time. That will enable to stay logged in based off their last visit vs. their last login.
@@ -57,7 +72,7 @@ exports.handler = async (event, context) => {
         })
         return {
           statusCode: 200,
-          body: JSON.stringify(userdata) // FIXME: change this to the tokenized user data
+          body: USER_TOKEN
         }
       }
       return {
@@ -66,7 +81,7 @@ exports.handler = async (event, context) => {
       }
     })
     .catch(error => ({
-      statusCode: 422,
-      body: `Oops! Something went wrong. ${error}`
+      statusCode: error.statusCode || 500,
+      body: `Oops! Something went wrong. ${JSON.stringify(error)}`
     }))
 }
