@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
 import md5 from 'md5'
-import uuid from 'uuid/v4'
+import { v4 as uuid } from 'uuid';
 import querystring from "querystring"
 import fetch from "node-fetch"
 
