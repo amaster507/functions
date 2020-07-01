@@ -45,10 +45,15 @@ exports.handler = async (event, context) => {
     .then(body => body.json())
     .then(userdata => {
       if (
-        userdata?.data?.getUser?.username &&
-        userdata?.data?.getUser?.isActive &&
-        userdata?.data?.getUser?.hasPassword?.password
+        userdata &&
+        userdata.data &&
+        userdata.data.getUser &&
+        userdata.data.getUser.username &&
+        userdata.data.getUser.isActive &&
+        userdata.data.getUser.hasPassword &&
+        userdata.data.getUser.hasPassword.password
       ) {
+        delete userdata.data.getUser.hasPassword
         const objectKeysToUpperCase = input => {
           if (typeof input !== 'object') return input;
           if (Array.isArray(input)) return input.map(objectKeysToUpperCase);
