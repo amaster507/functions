@@ -25,44 +25,45 @@ exports.handler = async (event, context) => {
       "IS_LOGIN_API": true,
     }
   }, key, {
-    expiresIn: "10 minutes",
+    expiresIn: "1 minute",
     issuer: "missionbase login",
     jwtid: uuid(),
     subject: "login"
   })
-
-  return {
-    statusCode: 200,
-    body: AUTH_TOKEN
-  }
 
   return fetch("http://3.231.127.133:8080/graphql", {
     headers: {
       auth: AUTH_TOKEN
     },
     method: "POST",
-    body: ``
-  }).then(() => ({
-    statusCode: 200,
     body: JSON.stringify({
       query: `query ($username: String!){ getUser(username:$username) { username isActive userId hasRole hasPassword { password } hasTypes hasGroupAccess { id hasRights { id name isTrue } forGroup { slug name isContact { id organization } isActive } } isContact { id firstName lastName } } }`,
       variables: { "username": username }
     })
-  }))
-
-
-  // Send greeting to Slack
-  return fetch(process.env.SLACK_WEBHOOK_URL, {
-    headers: {
-      "content-type": "application/json"
-    },
-    method: "POST",
-    body: JSON.stringify({ text: `${name} says hello!` })
   })
-    .then(() => ({
-      statusCode: 200,
-      body: `Hello, ${name}! Your greeting has been sent to Slack 👋`
-    }))
+    .then(body => body.json())
+    .then(userdata => {
+      if (true /** FIXME: put a condition here to check for valid user */) {
+        const USER_TOKEN = jwt.sign({
+          "https://missionbase.com/jwt/claims": userdata
+        }, key, {
+          // NOTE: This is the expiration time for users to stay logged in
+          // FIXME: We need to implement a refresh token that will update an expiration time based on the users last seen time. That will enable to stay logged in based off their last visit vs. their last login.
+          expiresIn: "30 days",
+          issuer: "missionbase login",
+          jwtid: uuid(),
+          subject: "login"
+        })
+        return {
+          statusCode: 200,
+          body: JSON.stringify(userdata) // FIXME: change this to the tokenized user data
+        }
+      }
+      return {
+        statusCode: 401,
+        body: 'The credentials provided did not match any authorized users.'
+      }
+    })
     .catch(error => ({
       statusCode: 422,
       body: `Oops! Something went wrong. ${error}`
