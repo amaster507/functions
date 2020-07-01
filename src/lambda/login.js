@@ -17,7 +17,7 @@ exports.handler = async (event, context) => {
   const username = params.username || null
   const pass = params.pass ? md5(params.pass) : null
   // NOTE: we could use the IP address to verify that the authorization stays with the IP that authenticated, but that could pose problems with users behind load balances/traveling
-  const clientIp = event.headers?.["client-ip"] || null
+  const clientIp = event.headers["client-ip"] || null
   const AUTH_TOKEN = jwt.sign({
     "https://missionbase.com/jwt/claims": {
       "PASSWORD": pass,
